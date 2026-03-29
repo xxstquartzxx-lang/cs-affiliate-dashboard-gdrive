@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>アフィリエイト分析（Google Drive連携）</title>
+<title>アフィリエイト経由売上 分析ダッシュボード</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--p:#1E3A5F;--a:#10B981;--al:#D1FAE5;--pl:#DBEAFE;--g50:#F9FAFB;--g100:#F3F4F6;--g200:#E5E7EB;--g300:#D1D5DB;--g400:#9CA3AF;--g500:#6B7280;--g700:#374151;--g900:#111827;--w:#FFF;--sh:0 1px 3px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.04)}
@@ -40,247 +40,125 @@ body{font-family:'Noto Sans JP','Helvetica Neue',Arial,sans-serif;background:var
 .tc{padding:14px 16px;border-radius:8px;background:var(--g50);border-left:3px solid var(--p)}.tv{font-size:22px;font-weight:800}.tl{font-size:11px;color:var(--g500);margin-top:2px}
 .up{font-size:11px;color:var(--a)}.dn{font-size:11px;color:#EF4444}
 .cg{margin-top:16px;padding:12px 16px;background:var(--g50);border-radius:8px;border:1px solid var(--g200)}
-.gd-btn{padding:10px 24px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:700;color:var(--w);background:var(--p);font-family:inherit;transition:background .2s}.gd-btn:hover{background:#2D5F8A}.gd-btn:disabled{opacity:.5;cursor:wait}
-.gd-btn--sm{font-size:12px;padding:8px 16px}
-.warn-box{background:#FEF2F2;border-radius:8px;padding:10px 16px;border:1px solid #FCA5A5;font-size:12px;color:#991B1B;line-height:1.6;margin-bottom:12px}
-.warn-box strong{color:#DC2626}
+/* モード選択 */
+.mode-sel{display:flex;gap:16px;margin-bottom:20px}.mode-card{flex:1;padding:24px;border-radius:10px;background:var(--w);border:2px solid var(--g200);cursor:pointer;text-align:center;transition:all .2s;box-shadow:var(--sh)}.mode-card:hover{border-color:var(--p);background:var(--pl)}.mode-card.active{border-color:var(--p);background:var(--pl)}.mode-card .mc-icon{font-size:32px;margin-bottom:8px}.mode-card .mc-title{font-size:14px;font-weight:700;color:var(--g900)}.mode-card .mc-desc{font-size:11px;color:var(--g400);margin-top:4px;line-height:1.5}
+.mode-sel.compact{gap:8px}.mode-sel.compact .mode-card{padding:8px 14px;flex:none;display:flex;align-items:center;gap:8px;min-width:0}.mode-sel.compact .mode-card .mc-icon{font-size:16px;margin-bottom:0}.mode-sel.compact .mode-card .mc-title{font-size:11px}.mode-sel.compact .mode-card .mc-desc{display:none}
+/* Google Drive UI */
+.gd-btn{padding:10px 24px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:700;color:var(--w);background:var(--p);font-family:inherit;transition:background .2s}.gd-btn:hover{background:#2D5F8A}.gd-btn:disabled{opacity:.5;cursor:wait}.gd-btn--sm{font-size:12px;padding:8px 16px}.gd-btn--sub{background:var(--g500)}
+.warn-box{background:#FEF2F2;border-radius:8px;padding:10px 16px;border:1px solid #FCA5A5;font-size:12px;color:#991B1B;line-height:1.6;margin-bottom:12px}.warn-box strong{color:#DC2626}.warn-box--yellow{background:#FFFBEB;border-color:#FCD34D;color:#92400E}
 .ok-box{background:var(--al);border-radius:8px;padding:10px 16px;border:1px solid rgba(16,185,129,.2);font-size:12px;color:#065F46;line-height:1.6;margin-bottom:12px}
-.progress-bar{width:100%;height:4px;background:var(--g200);border-radius:2px;margin:12px 0;overflow:hidden}
-.progress-fill2{height:100%;background:var(--p);border-radius:2px;transition:width .3s}
-.folder-list{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
-.folder-card{padding:14px 20px;border-radius:10px;background:var(--g50);border:2px solid var(--g200);cursor:pointer;transition:all .2s;min-width:140px;text-align:center}
-.folder-card:hover{border-color:var(--p);background:var(--pl)}
-.folder-card.active{border-color:var(--p);background:var(--pl)}
-.folder-card .fc-icon{font-size:24px;margin-bottom:4px}
-.folder-card .fc-name{font-size:13px;font-weight:700;color:var(--g900)}
-.folder-card .fc-sub{font-size:10px;color:var(--g400);margin-top:2px}
-.step-indicator{display:flex;gap:8px;align-items:center;margin-bottom:16px;font-size:12px;color:var(--g400)}
-.step-indicator .step{padding:4px 12px;border-radius:12px;background:var(--g100);font-weight:600}
-.step-indicator .step.on{background:var(--p);color:var(--w)}
-.step-indicator .step.done{background:var(--a);color:var(--w)}
+.info-box{background:var(--pl);border-radius:8px;padding:10px 16px;border:1px solid rgba(30,58,95,.13);font-size:12px;color:var(--g700);line-height:1.6;margin-bottom:12px}
+.progress-bar{width:100%;height:4px;background:var(--g200);border-radius:2px;margin:12px 0;overflow:hidden}.progress-fill{height:100%;background:var(--p);border-radius:2px;transition:width .3s}
+.folder-list{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}.folder-card{padding:14px 20px;border-radius:10px;background:var(--g50);border:2px solid var(--g200);cursor:pointer;transition:all .2s;min-width:140px;text-align:center}.folder-card:hover{border-color:var(--p);background:var(--pl)}.folder-card.active{border-color:var(--p);background:var(--pl)}.folder-card .fc-icon{font-size:24px;margin-bottom:4px}.folder-card .fc-name{font-size:13px;font-weight:700;color:var(--g900)}.folder-card .fc-sub{font-size:10px;color:var(--g400);margin-top:2px}
+.step-indicator{display:flex;gap:8px;align-items:center;margin-bottom:16px;font-size:12px;color:var(--g400)}.step-indicator .step{padding:4px 12px;border-radius:12px;background:var(--g100);font-weight:600}.step-indicator .step.on{background:var(--p);color:var(--w)}.step-indicator .step.done{background:var(--a);color:var(--w)}
 </style>
 </head>
 <body>
 <div id="tip"></div>
 <div class="ct">
-  <div class="card" style="margin-bottom:20px"><div style="padding:16px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="display:flex;align-items:center;gap:14px"><div style="width:4px;height:24px;border-radius:2px;background:var(--p);flex-shrink:0"></div><h1 style="font-size:18px;font-weight:800;letter-spacing:-.3px">アフィリエイト分析</h1><span style="font-size:11px;padding:3px 10px;border-radius:12px;background:var(--al);color:var(--a);font-weight:600">Google Drive連携</span></div><button class="rb hd" id="rst" onclick="reset()">リセット</button></div></div>
-  <!-- Drive Panel -->
-  <div class="card card--a" style="margin-bottom:20px" id="drivePanel">
-    <div id="loginView" style="padding:24px;text-align:center">
-      <div style="font-size:28px;margin-bottom:8px">📁</div>
-      <div style="font-size:14px;font-weight:700;color:var(--g900);margin-bottom:4px">Googleドライブから自動読み込み</div>
-      <div style="font-size:12px;color:var(--g400);margin-bottom:16px;line-height:1.6">店舗フォルダ → アフィリエイトフォルダを選択<br>CSVを自動判別・欠損チェックします</div>
-      <button class="gd-btn" id="loginBtn" onclick="handleLogin()">Googleアカウントでログイン</button>
-      <div style="font-size:11px;color:var(--g400);margin-top:8px" id="loginStatus"></div>
-    </div>
-    <div id="folderView" class="hd" style="padding:24px">
-      <div class="step-indicator" id="steps"></div>
-      <div id="folderContent"></div>
-    </div>
-    <div id="loadingView" class="hd" style="padding:24px">
-      <div style="font-size:14px;font-weight:700;color:var(--g900);margin-bottom:8px" id="loadMsg">読み込み中...</div>
-      <div class="progress-bar"><div class="progress-fill2" id="loadProg" style="width:0%"></div></div>
-      <div style="font-size:11px;color:var(--g400)" id="loadDetail"></div>
-    </div>
-    <div id="resultView" class="hd" style="padding:20px 24px">
-      <div id="checkResults"></div>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="gd-btn gd-btn--sm" onclick="loadCSVsFromFolder(GD.selectedFolder)">🔄 再読み込み</button>
-        <button class="gd-btn gd-btn--sm" style="background:var(--g500)" onclick="showFolders()">フォルダ選択に戻る</button>
-        <button class="rb" onclick="reset()">リセット</button>
+  <!-- ヘッダー -->
+  <div class="card" style="margin-bottom:20px"><div style="padding:16px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="display:flex;align-items:center;gap:14px"><div style="width:4px;height:24px;border-radius:2px;background:var(--p);flex-shrink:0"></div><h1 style="font-size:18px;font-weight:800;letter-spacing:-.3px;white-space:nowrap">アフィリエイト経由売上 分析ダッシュボード</h1></div><button class="rb hd" id="rst" onclick="reset()">リセット</button></div></div>
+
+  <!-- モード選択 -->
+  <div id="modeGuide" style="text-align:center;margin-bottom:16px;padding:18px 24px;background:var(--w);border-radius:10px;box-shadow:var(--sh)"><div style="font-size:18px;font-weight:800;color:var(--p);letter-spacing:-.3px">データの読み込み方法を選択してください</div><div style="font-size:12px;color:var(--g400);margin-top:4px">CSVファイルを直接アップロード、またはGoogleドライブから自動読み込み</div></div>
+  <div id="modeSelect" class="mode-sel">
+    <div class="mode-card" id="modeCSV" onclick="setMode('csv')"><div class="mc-icon">📁</div><div class="mc-title">CSVアップロード</div><div class="mc-desc">PCのCSVファイルを<br>ドラッグ＆ドロップ</div></div>
+    <div class="mode-card" id="modeGD" onclick="setMode('gdrive')"><div class="mc-icon">☁️</div><div class="mc-title">Googleドライブ連携</div><div class="mc-desc">ドライブのフォルダから<br>自動読み込み</div></div>
+  </div>
+
+  <!-- CSVアップロードパネル -->
+  <div id="csvPanel" class="hd">
+    <div class="card card--a" style="margin-bottom:20px" id="uCard">
+      <div id="uFull" style="padding:20px 24px"><div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div class="dz" id="dz" onclick="$('ci').click()"><span style="font-size:28px;filter:grayscale(.6)">📁</span><span style="font-size:13px;font-weight:600;color:var(--g700)">CSVファイルをドラッグ＆ドロップ</span><span style="font-size:11px;color:var(--g400)">全種類対応・複数ファイル可（成果確定/発生・パートナーRP・請求RP）</span></div><div style="display:flex;flex-direction:column;gap:6px"><label style="font-size:11px;color:var(--g500);font-weight:600">文字コード</label><div style="display:flex;gap:4px" id="eF"></div></div></div>
+        <div class="cg"><div style="font-size:12px;font-weight:700;color:var(--g700);margin-bottom:8px">対応CSV（RMS > 店舗様向け情報 > 5 アフィリエイト）</div><div style="font-size:11px;color:var(--g500);line-height:1.8">成果確定（注文一覧）/ 成果発生（注文一覧）→ 商品別の日次明細<br>パートナーレポート → パートナー別 月次集計（クリック数あり）<br>請求レポート → 全体の月次サマリー（確定ベース）<br><strong style="color:var(--p)">2024年・2025年・2026年すべて対応（YoY自動計算）</strong></div></div>
       </div>
+      <div id="uComp" class="uc hd"><div id="fTags" style="display:flex;gap:6px;flex-wrap:wrap;flex:1"></div><div style="display:flex;gap:6px;align-items:center;flex-shrink:0"><div style="display:flex;gap:3px" id="eC"></div><button class="ab" onclick="$('ci').click()">+ 追加</button></div></div>
+    </div>
+    <input type="file" accept=".csv" multiple class="fh" id="ci">
+  </div>
+
+  <!-- Googleドライブパネル -->
+  <div id="gdrivePanel" class="hd">
+    <div class="card card--a" style="margin-bottom:20px" id="gdrive-panel">
+      <div id="gd-login" style="padding:24px;text-align:center">
+        <div style="font-size:28px;margin-bottom:8px">☁️</div>
+        <div style="font-size:14px;font-weight:700;color:var(--g900);margin-bottom:4px">Googleドライブから読み込み</div>
+        <div style="font-size:12px;color:var(--g400);margin-bottom:16px;line-height:1.6">店舗フォルダ → 分析フォルダを選択してファイルを自動読み込み</div>
+        <button class="gd-btn" id="gd-loginBtn" onclick="GDrive.login()">Googleアカウントでログイン</button>
+        <div style="font-size:11px;color:var(--g400);margin-top:8px" id="gd-loginStatus"></div>
+      </div>
+      <div id="gd-folders" class="hd" style="padding:24px"><div class="step-indicator" id="gd-steps"></div><div id="gd-folderContent"></div></div>
+      <div id="gd-loading" class="hd" style="padding:24px"><div style="font-size:14px;font-weight:700;color:var(--g900);margin-bottom:8px" id="gd-loadMsg">読み込み中...</div><div class="progress-bar"><div class="progress-fill" id="gd-loadProg" style="width:0%"></div></div><div style="font-size:11px;color:var(--g400)" id="gd-loadDetail"></div></div>
+      <div id="gd-result" class="hd" style="padding:20px 24px"><div id="gd-resultContent"></div><div style="display:flex;gap:8px;margin-top:12px"><button class="gd-btn gd-btn--sm" onclick="GDrive.reload()">🔄 再読み込み</button><button class="gd-btn gd-btn--sm gd-btn--sub" onclick="GDrive.backToFolders()">フォルダ選択に戻る</button></div></div>
     </div>
   </div>
-  <div class="card card--g" id="empty" style="padding:40px 24px;text-align:center"><div style="font-size:36px;margin-bottom:10px;filter:grayscale(.7)">📊</div><div style="font-size:14px;font-weight:600;color:var(--g700);margin-bottom:4px">Googleドライブにログインしてください</div><div style="font-size:12px;color:var(--g400)">店舗フォルダ → アフィリエイトフォルダのCSVを自動で読み込みます</div></div>
+
+  <!-- データチェック結果（共通） -->
+  <div id="dataCheck" class="hd" style="margin-bottom:20px"></div>
+
+  <!-- 空状態 -->
+  <div class="card card--g hd" id="empty" style="padding:40px 24px;text-align:center"><div style="font-size:36px;margin-bottom:10px;filter:grayscale(.7)">📊</div><div style="font-size:14px;font-weight:600;color:var(--g700);margin-bottom:4px">CSVをドロップしてダッシュボードを表示</div><div style="font-size:12px;color:var(--g400)">複数ファイル・複数月・複数年をまとめてアップロード可能</div></div>
+
+  <!-- ダッシュボード -->
   <div id="dash" class="hd"><div class="tabs" id="tBar"></div><div id="tC"></div></div>
 </div>
+
+<!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
-// ═══ Config ═══
+// ═══════════════════════════════════════════════════════════
+// Google Drive連携モジュール（汎用）
+// ═══════════════════════════════════════════════════════════
+var GDrive=(function(){
 var CLIENT_ID='324002939529-d3djh51g7hqocu6i918669rootn59ao8.apps.googleusercontent.com';
 var SCOPES='https://www.googleapis.com/auth/drive.readonly';
+var token=null,tokenClient=null,rootFolders=[],selectedStore=null,selectedFolder=null;
+function _$(id){return document.getElementById(id)}
+function showView(v){['gd-login','gd-folders','gd-loading','gd-result'].forEach(function(id){_$(id).classList.toggle('hd',id!==v)})}
+function updateSteps(n){var st=_$('gd-steps');st.innerHTML='';[{l:'ログイン',n:0},{l:'店舗選択',n:1},{l:'フォルダ選択',n:2},{l:'読み込み',n:3}].forEach(function(s){var sp=document.createElement('span');sp.className='step'+(s.n<n?' done':(s.n===n?' on':''));sp.textContent=s.l;st.appendChild(sp);if(s.n<3){var ar=document.createElement('span');ar.textContent='→';st.appendChild(ar)}})}
+function driveGet(url){return fetch(url,{headers:{'Authorization':'Bearer '+token}}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+function driveList(q){return driveGet('https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(q)+'&fields=files(id,name,mimeType)&pageSize=200')}
+function driveText(fid){return fetch('https://www.googleapis.com/drive/v3/files/'+fid+'?alt=media',{headers:{'Authorization':'Bearer '+token}}).then(function(r){return r.text()})}
+function initGIS(){tokenClient=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:SCOPES,callback:onToken})}
+function onToken(r){if(r.error){_$('gd-loginStatus').innerHTML='<span style="color:#DC2626">ログインエラー: '+r.error+'</span>';_$('gd-loginBtn').disabled=false;return}token=r.access_token;showFolders()}
+async function showFolders(){showView('gd-folders');var fc=_$('gd-folderContent');fc.innerHTML='<div style="color:var(--g400);font-size:12px">フォルダを検索中...</div>';updateSteps(1);try{var res=await driveList("'root' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false");rootFolders=res.files||[];if(!rootFolders.length){fc.innerHTML='<div class="warn-box">マイドライブにフォルダがありません</div>';return}showStoreSelect()}catch(e){fc.innerHTML='<div class="warn-box">フォルダの取得に失敗: '+e.message+'</div>'}}
+function showStoreSelect(){updateSteps(1);var fc=_$('gd-folderContent');fc.innerHTML='';var t=document.createElement('div');t.style.cssText='font-size:14px;font-weight:700;color:var(--g900);margin-bottom:12px';t.textContent='① 店舗フォルダを選択';fc.appendChild(t);var list=document.createElement('div');list.className='folder-list';rootFolders.forEach(function(f){var c=document.createElement('div');c.className='folder-card';c.innerHTML='<div class="fc-icon">📁</div><div class="fc-name">'+f.name+'</div>';c.onclick=function(){selectedStore=f;showSubFolders(f)};list.appendChild(c)});fc.appendChild(list)}
+async function showSubFolders(store){updateSteps(2);var fc=_$('gd-folderContent');fc.innerHTML='<div style="color:var(--g400);font-size:12px">'+store.name+' のサブフォルダを検索中...</div>';try{var res=await driveList("'"+store.id+"' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false");var subs=res.files||[];fc.innerHTML='';var t=document.createElement('div');t.style.cssText='font-size:14px;font-weight:700;color:var(--g900);margin-bottom:4px';t.textContent='② 分析フォルダを選択';fc.appendChild(t);var s=document.createElement('div');s.style.cssText='font-size:12px;color:var(--g400);margin-bottom:12px';s.textContent=store.name+' > ...';fc.appendChild(s);var bk=document.createElement('button');bk.className='rb';bk.style.marginBottom='12px';bk.textContent='← 店舗選択に戻る';bk.onclick=showStoreSelect;fc.appendChild(bk);if(!subs.length){fc.innerHTML+='<div class="warn-box">サブフォルダがありません</div>';return}var recKw=GDrive.recommendKeyword||'';var list=document.createElement('div');list.className='folder-list';subs.forEach(function(f){var isRec=recKw&&f.name.includes(recKw);var c=document.createElement('div');c.className='folder-card'+(isRec?' active':'');c.innerHTML='<div class="fc-icon">'+(isRec?'📊':'📁')+'</div><div class="fc-name">'+f.name+'</div>'+(isRec?'<div class="fc-sub">← 推奨</div>':'');c.onclick=function(){selectedFolder=f;startLoad(f)};list.appendChild(c)});fc.appendChild(list)}catch(e){fc.innerHTML='<div class="warn-box">サブフォルダの取得に失敗: '+e.message+'</div>'}}
+async function startLoad(folder){showView('gd-loading');updateSteps(3);_$('gd-loadMsg').textContent=selectedStore.name+' / '+folder.name+' を読み込み中...';_$('gd-loadProg').style.width='5%';_$('gd-loadDetail').textContent='ファイルを検索中...';try{var res=await driveList("'"+folder.id+"' in parents and trashed=false and mimeType!='application/vnd.google-apps.folder'");var files=(res.files||[]).map(function(f){f.sub='';return f});_$('gd-loadDetail').textContent='サブフォルダを検索中...';var subRes=await driveList("'"+folder.id+"' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false");var subs=subRes.files||[];for(var si=0;si<subs.length;si++){_$('gd-loadProg').style.width=Math.round(5+si/Math.max(subs.length,1)*10)+'%';_$('gd-loadDetail').textContent='サブフォルダ検索中... '+subs[si].name;var sf=await driveList("'"+subs[si].id+"' in parents and trashed=false and mimeType!='application/vnd.google-apps.folder'");(sf.files||[]).forEach(function(f){f.sub=subs[si].name;files.push(f)})}if(!files.length){_$('gd-loadDetail').textContent='ファイルが見つかりません';setTimeout(function(){showView('gd-folders');showSubFolders(selectedStore)},2000);return}_$('gd-loadProg').style.width='15%';if(typeof GDrive.onFilesReady==='function'){await GDrive.onFilesReady(files,selectedStore,folder)}else{showResult('完了',files.length+'件のファイルを検出しました')}}catch(e){_$('gd-loadDetail').innerHTML='<span style="color:#DC2626">エラー: '+e.message+'</span>'}}
+function showResult(t,m){showView('gd-result');_$('gd-resultContent').innerHTML='<div class="ok-box">✅ <strong>'+t+'</strong> — '+m+'</div>'}
+var GDrive={recommendKeyword:'アフィリ',onFilesReady:null,
+login:function(){if(!tokenClient){try{initGIS()}catch(e){_$('gd-loginStatus').textContent='認証ライブラリの読み込みに失敗。ページを再読み込みしてください。';return}}_$('gd-loginBtn').disabled=true;_$('gd-loginStatus').textContent='ログイン中...';tokenClient.requestAccessToken()},
+readFile:function(fid){return driveText(fid)},
+setProgress:function(cur,tot,fn){var pct=15+Math.round(cur/tot*80);_$('gd-loadProg').style.width=pct+'%';_$('gd-loadDetail').textContent='読み込み中 ('+(cur+1)+'/'+tot+') '+(fn||'')},
+showResult:showResult,showError:function(m){showView('gd-result');_$('gd-resultContent').innerHTML='<div class="warn-box"><strong>❌ エラー</strong><br>'+m+'</div>'},
+showWarnings:function(w){if(!w.length)return;_$('gd-resultContent').innerHTML+='<div class="warn-box warn-box--yellow"><strong>⚠️ 警告（'+w.length+'件）</strong><br>'+w.join('<br>')+'</div>'},
+showInfo:function(m){_$('gd-resultContent').innerHTML+='<div class="info-box">'+m+'</div>'},
+appendResult:function(h){_$('gd-resultContent').innerHTML+=h},
+reload:function(){if(selectedFolder)startLoad(selectedFolder)},backToFolders:function(){showFolders()},
+reset:function(){selectedStore=null;selectedFolder=null;if(token)showFolders();else showView('gd-login')},
+getStore:function(){return selectedStore},getFolder:function(){return selectedFolder}};
+window.addEventListener('load',function(){setTimeout(function(){try{initGIS()}catch(e){}},500)});
+return GDrive})();
+
+// ═══ App State ═══
 var $=function(id){return document.getElementById(id)};
-var S={orders:[],pm:{},billing:[],fn:[],tab:'overview',sp:'all',sm:'all',dp:'all',spt:'all',sptM:'latest',A:null,token:null};
+var S={orders:[],pm:{},billing:[],fn:[],enc:'Shift_JIS',tab:'overview',sp:'all',sm:'all',dp:'all',spt:'all',sptM:'latest',A:null,mode:null};
 var CL=['#1E3A5F','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899','#06B6D4','#F97316','#6366F1','#14B8A6','#A855F7'];
 var TB=[{k:'overview',l:'概要'},{k:'products',l:'商品分析'},{k:'partners',l:'パートナー'}];
-var GD={rootFolders:[],storeFolders:[],selectedStore:null,selectedFolder:null};
 
-// ═══ Google Auth ═══
-var tokenClient;
-function initGIS(){tokenClient=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:SCOPES,callback:onToken})}
-function handleLogin(){if(!tokenClient){try{initGIS()}catch(e){$('loginStatus').textContent='認証ライブラリの読み込みに失敗。ページを再読み込みしてください。';return}}$('loginBtn').disabled=true;$('loginStatus').textContent='ログイン中...';tokenClient.requestAccessToken()}
-function onToken(r){if(r.error){$('loginStatus').innerHTML='<span style="color:#DC2626">ログインエラー: '+r.error+'</span>';$('loginBtn').disabled=false;return}S.token=r.access_token;showFolders()}
-
-// ═══ Drive API ═══
-function driveGet(url){return fetch(url,{headers:{'Authorization':'Bearer '+S.token}}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
-function driveText(fid){return fetch('https://www.googleapis.com/drive/v3/files/'+fid+'?alt=media',{headers:{'Authorization':'Bearer '+S.token}}).then(function(r){return r.text()})}
-function driveList(q){return driveGet('https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(q)+'&fields=files(id,name,mimeType)&pageSize=200')}
-
-// ═══ Folder Browser ═══
-function showView(v){['loginView','folderView','loadingView','resultView'].forEach(function(id){$(id).classList.toggle('hd',id!==v)})}
-
-async function showFolders(){
-  showView('folderView');
-  var fc=$('folderContent');fc.innerHTML='<div style="color:var(--g400);font-size:12px">フォルダを検索中...</div>';
-  updateSteps(1);
-  try{
-    // ルートフォルダ一覧（マイドライブ直下のフォルダ）
-    var res=await driveList("'root' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false");
-    GD.rootFolders=res.files||[];
-    if(!GD.rootFolders.length){fc.innerHTML='<div class="warn-box">マイドライブにフォルダがありません</div>';return}
-    showStoreSelect();
-  }catch(e){fc.innerHTML='<div class="warn-box">フォルダの取得に失敗: '+e.message+'</div>'}
+function setMode(m){
+  S.mode=m;
+  $('modeGuide').classList.add('hd');
+  $('modeSelect').classList.add('compact');
+  $('modeCSV').classList.toggle('active',m==='csv');
+  $('modeGD').classList.toggle('active',m==='gdrive');
+  $('csvPanel').classList.toggle('hd',m!=='csv');
+  $('gdrivePanel').classList.toggle('hd',m!=='gdrive');
+  if(m==='csv'){$('empty').classList.remove('hd');$('empty').style.display='';}
+  else{$('empty').classList.add('hd');$('empty').style.display='none';}
 }
 
-function showStoreSelect(){
-  updateSteps(1);
-  var fc=$('folderContent');fc.innerHTML='';
-  var title=document.createElement('div');title.style.cssText='font-size:14px;font-weight:700;color:var(--g900);margin-bottom:12px';title.textContent='① 店舗フォルダを選択';fc.appendChild(title);
-  var list=document.createElement('div');list.className='folder-list';
-  GD.rootFolders.forEach(function(f){
-    var card=document.createElement('div');card.className='folder-card';
-    card.innerHTML='<div class="fc-icon">📁</div><div class="fc-name">'+f.name+'</div>';
-    card.onclick=function(){GD.selectedStore=f;showSubFolders(f)};
-    list.appendChild(card);
-  });
-  fc.appendChild(list);
-}
-
-async function showSubFolders(store){
-  updateSteps(2);
-  var fc=$('folderContent');fc.innerHTML='<div style="color:var(--g400);font-size:12px">'+store.name+' のサブフォルダを検索中...</div>';
-  try{
-    var res=await driveList("'"+store.id+"' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false");
-    GD.storeFolders=res.files||[];
-    fc.innerHTML='';
-    var title=document.createElement('div');title.style.cssText='font-size:14px;font-weight:700;color:var(--g900);margin-bottom:4px';title.textContent='② 分析フォルダを選択';fc.appendChild(title);
-    var sub=document.createElement('div');sub.style.cssText='font-size:12px;color:var(--g400);margin-bottom:12px';sub.textContent=store.name+' > ...';fc.appendChild(sub);
-    var back=document.createElement('button');back.className='rb';back.style.marginBottom='12px';back.textContent='← 店舗選択に戻る';back.onclick=showStoreSelect;fc.appendChild(back);
-    if(!GD.storeFolders.length){fc.innerHTML+='<div class="warn-box">「'+store.name+'」にサブフォルダがありません</div>';return}
-    var list=document.createElement('div');list.className='folder-list';
-    GD.storeFolders.forEach(function(f){
-      var isAff=f.name.includes('アフィリ');
-      var card=document.createElement('div');card.className='folder-card'+(isAff?' active':'');
-      card.innerHTML='<div class="fc-icon">'+(isAff?'📊':'📁')+'</div><div class="fc-name">'+f.name+'</div>'+(isAff?'<div class="fc-sub">← 推奨</div>':'');
-      card.onclick=function(){GD.selectedFolder=f;loadCSVsFromFolder(f)};
-      list.appendChild(card);
-    });
-    fc.appendChild(list);
-  }catch(e){fc.innerHTML='<div class="warn-box">サブフォルダの取得に失敗: '+e.message+'</div>'}
-}
-
-function updateSteps(n){
-  var st=$('steps');st.innerHTML='';
-  [{l:'ログイン',n:0},{l:'店舗選択',n:1},{l:'フォルダ選択',n:2},{l:'読み込み',n:3}].forEach(function(s){
-    var sp=document.createElement('span');sp.className='step'+(s.n<n?' done':(s.n===n?' on':''));sp.textContent=s.l;st.appendChild(sp);
-    if(s.n<3){var ar=document.createElement('span');ar.textContent='→';st.appendChild(ar)}
-  });
-}
-
-// ═══ Load CSVs from selected folder ═══
-async function loadCSVsFromFolder(folder){
-  showView('loadingView');updateSteps(3);
-  $('loadMsg').textContent=GD.selectedStore.name+' / '+folder.name+' を読み込み中...';
-  $('loadProg').style.width='5%';$('loadDetail').textContent='CSVファイルを検索中...';
-  try{
-    // 直下のCSVを検索
-    var res=await driveList("'"+folder.id+"' in parents and (mimeType='text/csv' or name contains '.csv') and trashed=false");
-    var files=(res.files||[]).map(function(f){f.sub='';return f});
-
-    // サブフォルダも検索
-    $('loadDetail').textContent='サブフォルダを検索中...';
-    var subRes=await driveList("'"+folder.id+"' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false");
-    var subs=subRes.files||[];
-    for(var si=0;si<subs.length;si++){
-      $('loadProg').style.width=Math.round(5+si/Math.max(subs.length,1)*10)+'%';
-      $('loadDetail').textContent='サブフォルダ検索中... '+subs[si].name;
-      var subCsv=await driveList("'"+subs[si].id+"' in parents and (mimeType='text/csv' or name contains '.csv') and trashed=false");
-      (subCsv.files||[]).forEach(function(f){f.sub=subs[si].name;files.push(f)});
-    }
-
-    if(!files.length){$('loadDetail').textContent='CSVファイルが見つかりません';setTimeout(function(){showView('folderView');showSubFolders(GD.selectedStore)},2000);return}
-
-    S.orders=[];S.pm={};S.billing=[];S.fn=[];
-    var report={fixed:{},partner:{},billing:{},errors:[],warnings:[]};
-
-    for(var i=0;i<files.length;i++){
-      var f=files[i];
-      var pct=20+Math.round(i/files.length*70);
-      $('loadProg').style.width=pct+'%';$('loadDetail').textContent='読み込み中 ('+(i+1)+'/'+files.length+') '+(f.sub?f.sub+'/':'')+f.name;
-      try{
-        var text=await driveText(f.id);
-        var rows=pCSV(text);
-        var info=idT(rows);
-        if(info.t==='fixed'||info.t==='orders'){
-          var nw=exO(rows,info.h);if(nw.length){var ym=nw[0].ym;S.orders=dedup(S.orders.concat(nw));report.fixed[ym]={fn:(f.sub?f.sub+'/':'')+f.name,cnt:nw.length};S.fn.push((f.sub?f.sub+'/':'')+f.name+' ('+info.t+' '+ym+')')}
-        }else if(info.t==='partner'){
-          var nw2=exP(rows,info.h);if(!S.pm[info.ym])S.pm[info.ym]=[];var seen=new Set(S.pm[info.ym].map(function(p){return p.id}));S.pm[info.ym]=S.pm[info.ym].concat(nw2.filter(function(p){return!seen.has(p.id)}));report.partner[info.ym]={fn:(f.sub?f.sub+'/':'')+f.name,cnt:nw2.length};S.fn.push((f.sub?f.sub+'/':'')+f.name+' (partner '+info.ym+')')
-        }else if(info.t==='billing'){
-          var nw3=exB(rows,info.h);var seen2=new Set(S.billing.map(function(b){return b.ym}));S.billing=S.billing.concat(nw3.filter(function(b){return!seen2.has(b.ym)}));report.billing[(f.sub?f.sub+'/':'')+f.name]={months:nw3.map(function(b){return b.ym})};S.fn.push((f.sub?f.sub+'/':'')+f.name+' (billing)')
-        }else{report.errors.push((f.sub?f.sub+'/':'')+f.name+' → 種類を判別できません')}
-      }catch(e){report.errors.push((f.sub?f.sub+'/':'')+f.name+' → '+e.message)}
-    }
-
-    $('loadProg').style.width='95%';$('loadDetail').textContent='整合性チェック中...';
-
-    // Coverage check（成果確定は2ヶ月ズレのため直近2ヶ月を除外）
-    var fYMs=Object.keys(report.fixed).sort(),pYMs2=Object.keys(report.partner).sort();
-    var allYMs=new Set();fYMs.forEach(function(y){allYMs.add(y)});pYMs2.forEach(function(y){allYMs.add(y)});
-    allYMs=Array.from(allYMs).sort();
-    report.pendingFixed=[];
-    if(allYMs.length>=2){
-      var cur=new Date(allYMs[0]+'-01'),end=new Date(allYMs[allYMs.length-1]+'-01');
-      // 直近2ヶ月の境界を計算
-      var now=new Date();var cutoff=new Date(now.getFullYear(),now.getMonth()-1,1); // 2ヶ月前の月初
-      while(cur<=end){
-        var ym=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0');
-        if(!report.fixed[ym]){
-          if(cur>=cutoff){report.pendingFixed.push(ym)} // 直近2ヶ月は未確定扱い
-          else{report.warnings.push('成果確定: '+ym+' のデータがありません')}
-        }
-        if(!report.partner[ym])report.warnings.push('パートナーRP: '+ym+' のデータがありません');
-        cur.setMonth(cur.getMonth()+1);
-      }
-    }
-
-    $('loadProg').style.width='100%';
-    S.fileReport=report;
-    analyze();
-    setTimeout(function(){showView('resultView');showCheckResults();render()},300);
-  }catch(e){$('loadDetail').innerHTML='<span style="color:#DC2626">エラー: '+e.message+'</span>'}
-}
-
-function showCheckResults(){
-  var r=S.fileReport,ct=$('checkResults');ct.innerHTML='';
-  var fN=Object.keys(r.fixed).length,pN=Object.keys(r.partner).length;
-  var hasErr=r.errors.length>0,hasWarn=r.warnings.length>0;
-  var storeName=GD.selectedStore?GD.selectedStore.name:'';
-  var folderName=GD.selectedFolder?GD.selectedFolder.name:'';
-  ct.innerHTML+='<div style="font-size:13px;font-weight:700;color:var(--g900);margin-bottom:8px">📁 '+storeName+' / '+folderName+'</div>';
-
-  // データ定義（CSVの仕組み説明）
-  ct.innerHTML+='<div class="ib" style="margin-bottom:12px"><strong>📋 データの仕組み</strong><br>'+
-    '<span style="font-size:11px;line-height:1.8">'+
-    '・<strong>成果確定CSV</strong>：発生月から約2ヶ月後に楽天から発行されます（例：1月発生分 → 3月に確定）<br>'+
-    '・<strong>パートナーRP</strong>：発生月ベースで翌月に発行されます（ズレなし）<br>'+
-    '・<strong>請求レポート</strong>：確定月ベースの月次サマリーです</span></div>';
-
-  // 未確定月の表示（正常）
-  if(r.pendingFixed&&r.pendingFixed.length>0){
-    ct.innerHTML+='<div style="background:var(--pl);border-radius:8px;padding:10px 16px;border:1px solid rgba(30,58,95,.13);font-size:12px;color:var(--g700);margin-bottom:12px">'+
-      '<strong>🕐 未確定（正常）</strong> — 成果確定: '+r.pendingFixed.join(', ')+' は確定待ちのため未発行です</div>';
-  }
-
-  if(!hasErr&&!hasWarn){ct.innerHTML+='<div class="ok-box">✅ <strong>正常</strong> — 成果確定 '+fN+'ヶ月 / パートナーRP '+pN+'ヶ月 を読み込みました</div>'}
-  else{
-    if(hasErr){var eh='<div class="warn-box"><strong>❌ エラー（'+r.errors.length+'件）</strong><br>';r.errors.forEach(function(e){eh+=e+'<br>'});eh+='</div>';ct.innerHTML+=eh}
-    if(hasWarn){var wh='<div class="warn-box" style="background:#FFFBEB;border-color:#FCD34D;color:#92400E"><strong>⚠️ 警告（'+r.warnings.length+'件）</strong><br>';r.warnings.forEach(function(w){wh+=w+'<br>'});wh+='</div>';ct.innerHTML+=wh}
-    ct.innerHTML+='<div class="ib">読み込み済み: 成果確定 '+fN+'ヶ月 / パートナーRP '+pN+'ヶ月</div>';
-  }
-}
-
-function reset(){S={orders:[],pm:{},billing:[],fn:[],tab:'overview',sp:'all',sm:'all',dp:'all',spt:'all',sptM:'latest',A:null,token:S.token};GD={rootFolders:GD.rootFolders,storeFolders:[],selectedStore:null,selectedFolder:null};if(S.token)showFolders();else showView('loginView');render()}
-
+// ═══ CSV Parser (RFC4180) ═══
 function pCSV(t){var R=[],r=[],f='',q=0,i=0;while(i<t.length){var c=t[i];if(q){if(c==='"'){if(i+1<t.length&&t[i+1]==='"'){f+='"';i+=2;continue}q=0;i++;continue}f+=c;i++}else{if(c==='"'){q=1;i++}else if(c===','){r.push(f.trim());f='';i++}else if(c==='\r'){r.push(f.trim());R.push(r);r=[];f='';i++;if(i<t.length&&t[i]==='\n')i++}else if(c==='\n'){r.push(f.trim());R.push(r);r=[];f='';i++}else{f+=c;i++}}}if(f||r.length){r.push(f.trim());R.push(r)}return R}
 
 // ═══ Column detect ═══
@@ -387,6 +265,7 @@ function analyze(){
 
   S.A={allD:allD,allYM:allYM,aYM:aYM,daily:daily,prods:prods,pDaily:pDaily,pmm:pmm,omm:omm,monthly:monthly,mMap:mMap,blMap:blMap,pMon:pMon,pList:pList,pYMs:pYMs,tA:tA,tO:tO,uO:uO,tC:tC,lb:lb};
 }
+
 // ═══ SVG Charts ═══
 // 共通: 軸ラベル描画
 function drawAxis(g,ns,ih,iw,mx,steps){
@@ -472,18 +351,71 @@ function drawMonthlyBar(ct,data,id,color,opts){
   }
   svg.appendChild(g);ct.innerHTML='';ct.appendChild(svg);
 }
+
+// ═══ UI helpers ═══
+function kpi(l,v,sub,ac){var d=document.createElement('div');d.className='card kpi'+(ac?' card--a':'');d.innerHTML='<div class="kl">'+l+'</div><div class="kv">'+v+'</div>'+(sub?'<div class="ks">'+sub+'</div>':'');return d}
+function sec(t,bar){var w=document.createElement('div');w.className='card'+(bar?' card--'+bar:'');var h=document.createElement('div');h.className='shd';var lf=document.createElement('div');lf.style.cssText='display:flex;align-items:center';var b=document.createElement('div');b.className='sb'+(bar?' sb--'+bar:'');var tt=document.createElement('span');tt.className='st';tt.textContent=t;lf.appendChild(b);lf.appendChild(tt);var rt=document.createElement('div');rt.style.cssText='display:flex;align-items:center;gap:10px';h.appendChild(lf);h.appendChild(rt);var bd=document.createElement('div');bd.className='sbd';w.appendChild(h);w.appendChild(bd);return{w:w,b:bd,r:rt}}
 // ═══ UI helpers ═══
 function kpi(l,v,sub,ac){var d=document.createElement('div');d.className='card kpi'+(ac?' card--a':'');d.innerHTML='<div class="kl">'+l+'</div><div class="kv">'+v+'</div>'+(sub?'<div class="ks">'+sub+'</div>':'');return d}
 function sec(t,bar){var w=document.createElement('div');w.className='card'+(bar?' card--'+bar:'');var h=document.createElement('div');h.className='shd';var lf=document.createElement('div');lf.style.cssText='display:flex;align-items:center';var b=document.createElement('div');b.className='sb'+(bar?' sb--'+bar:'');var tt=document.createElement('span');tt.className='st';tt.textContent=t;lf.appendChild(b);lf.appendChild(tt);var rt=document.createElement('div');rt.style.cssText='display:flex;align-items:center;gap:10px';h.appendChild(lf);h.appendChild(rt);var bd=document.createElement('div');bd.className='sbd';w.appendChild(h);w.appendChild(bd);return{w:w,b:bd,r:rt}}
 
-// ═══ Render (Drive版) ═══
+// ═══ Render ═══
 function render(){
-  var A=S.A;
-  $('empty').classList.toggle('hd',!!A);$('dash').classList.toggle('hd',!A);$('rst').classList.toggle('hd',!A);
+  var A=S.A,hf=S.fn.length>0;
+  if(S.mode==='csv'){
+    $('uFull').classList.toggle('hd',hf);$('uComp').classList.toggle('hd',!hf);
+    if(hf){var tg=$('fTags');tg.innerHTML='';S.fn.forEach(function(f){var s=document.createElement('span');s.className='ft';s.textContent='✓ '+f;tg.appendChild(s)})}
+    rE('eF','eb');rE('eC','es');
+  }
+  $('empty').classList.toggle('hd',!!A||S.mode!=='csv');
+  $('dash').classList.toggle('hd',!A);$('rst').classList.toggle('hd',!A);
+  $('dataCheck').classList.toggle('hd',!A);
+  if(A)showDataCheck();
   if(!A)return;
   var tb=$('tBar');tb.innerHTML='';TB.forEach(function(t){var b=document.createElement('button');b.className='tbtn'+(S.tab===t.k?' on':'');b.textContent=t.l;b.onclick=function(){S.tab=t.k;render()};tb.appendChild(b)});
   var tc=$('tC');tc.innerHTML='';
   if(S.tab==='overview')rOv(tc,A);else if(S.tab==='partners')rPt(tc,A);else if(S.tab==='products')rPr(tc,A);
+}
+function rE(id,cls){var el=$(id);if(!el)return;el.innerHTML='';['Shift_JIS','UTF-8'].forEach(function(e){var b=document.createElement('button');b.className=cls+(S.enc===e?' on':'');b.textContent=e;b.onclick=function(){S.enc=e;render()};el.appendChild(b)})}
+
+// ═══ 共通データチェック（①②③） ═══
+function showDataCheck(){
+  var ct=$('dataCheck');if(!ct)return;ct.innerHTML='';
+  var A=S.A;if(!A)return;
+  var allYM=A.allYM,pYMs=A.pYMs;
+
+  // ① データの仕組み説明
+  ct.innerHTML+='<div class="card" style="margin-bottom:12px"><div style="padding:14px 22px"><div class="ib"><strong>📋 データの仕組み</strong><br><span style="font-size:11px;line-height:1.8">・<strong>成果確定CSV</strong>：発生月から約2ヶ月後に楽天から発行されます（例：1月発生分 → 3月に確定）<br>・<strong>パートナーRP</strong>：発生月ベースで翌月に発行されます（ズレなし）<br>・<strong>請求レポート</strong>：確定月ベースの月次サマリーです</span></div>';
+
+  // ③ 欠損チェック（直近2ヶ月除外）
+  var allMonths=new Set();allYM.forEach(function(y){allMonths.add(y)});pYMs.forEach(function(y){allMonths.add(y)});
+  allMonths=Array.from(allMonths).sort();
+  var warnings=[],pendingFixed=[];
+  if(allMonths.length>=2){
+    var now=new Date(),cutoff=new Date(now.getFullYear(),now.getMonth()-1,1);
+    var cur=new Date(allMonths[0]+'-01'),end=new Date(allMonths[allMonths.length-1]+'-01');
+    var fixedYMs=new Set(allYM);var partnerYMs=new Set(pYMs);
+    while(cur<=end){
+      var ym=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0');
+      if(!fixedYMs.has(ym)){if(cur>=cutoff)pendingFixed.push(ym);else warnings.push('成果確定: '+ym+' のデータがありません')}
+      if(!partnerYMs.has(ym)&&pYMs.length>0)warnings.push('パートナーRP: '+ym+' のデータがありません');
+      cur.setMonth(cur.getMonth()+1);
+    }
+  }
+
+  // ② 未確定月の正常表示
+  if(pendingFixed.length>0){
+    ct.querySelector('.ib').insertAdjacentHTML('afterend','<div style="margin-top:10px;background:var(--pl);border-radius:8px;padding:10px 16px;border:1px solid rgba(30,58,95,.13);font-size:12px;color:var(--g700)"><strong>🕐 未確定（正常）</strong> — 成果確定: '+pendingFixed.join(', ')+' は確定待ちのため未発行です</div>');
+  }
+  if(warnings.length>0){
+    ct.querySelector('.ib').insertAdjacentHTML('afterend','<div style="margin-top:10px" class="warn-box warn-box--yellow"><strong>⚠️ 警告（'+warnings.length+'件）</strong><br>'+warnings.join('<br>')+'</div>');
+  }
+
+  // 読み込み状況サマリー
+  var fN=allYM.length,pN=pYMs.length;
+  ct.querySelector('.ib').insertAdjacentHTML('afterend','<div style="margin-top:10px" class="ok-box">✅ 読み込み済み: 成果確定 '+fN+'ヶ月 / パートナーRP '+pN+'ヶ月</div>');
+
+  ct.innerHTML+='</div></div>';
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -861,10 +793,51 @@ function rPM(){
   });
   tbl.appendChild(tbody);ct.appendChild(tbl);
 }
+// ═══ File Processing ═══
+var pend=0;
+function proc(file){pend++;var rd=new FileReader();rd.onload=function(e){var rows=pCSV(e.target.result),info=idT(rows);if(info.t==='fixed'||info.t==='orders'){var nw=exO(rows,info.h);S.orders=dedup(S.orders.concat(nw));S.fn.push(file.name+' ('+info.t+')')}else if(info.t==='partner'){var nw=exP(rows,info.h);if(!S.pm[info.ym])S.pm[info.ym]=[];var seen=new Set(S.pm[info.ym].map(function(p){return p.id}));S.pm[info.ym]=S.pm[info.ym].concat(nw.filter(function(p){return!seen.has(p.id)}));S.fn.push(file.name+' (partner '+info.ym+')')}else if(info.t==='billing'){var nw=exB(rows,info.h);var seen=new Set(S.billing.map(function(b){return b.ym}));S.billing=S.billing.concat(nw.filter(function(b){return!seen.has(b.ym)}));S.fn.push(file.name+' (billing)')}else{S.fn.push(file.name+' (?)')}pend--;if(pend===0){analyze();render()}};rd.readAsText(file,S.enc)}
+function hF(fs){Array.from(fs).forEach(proc);$('ci').value=''}
+function reset(){S={orders:[],pm:{},billing:[],fn:[],enc:S.enc,tab:'overview',sp:'all',sm:'all',dp:'all',spt:'all',sptM:'latest',A:null};render()}
 
-// ═══ Init ═══
+// ═══ Google Drive Callback ═══
+GDrive.onFilesReady=async function(files,store,folder){
+  S.orders=[];S.pm={};S.billing=[];S.fn=[];
+  for(var i=0;i<files.length;i++){
+    var f=files[i];var label=(f.sub?f.sub+'/':'')+f.name;
+    GDrive.setProgress(i,files.length,label);
+    try{
+      var text=await GDrive.readFile(f.id);
+      var rows=pCSV(text);var info=idT(rows);
+      if(info.t==='fixed'||info.t==='orders'){var nw=exO(rows,info.h);S.orders=dedup(S.orders.concat(nw));S.fn.push(label+' ('+info.t+')')}
+      else if(info.t==='partner'){var nw2=exP(rows,info.h);if(!S.pm[info.ym])S.pm[info.ym]=[];var seen=new Set(S.pm[info.ym].map(function(p){return p.id}));S.pm[info.ym]=S.pm[info.ym].concat(nw2.filter(function(p){return!seen.has(p.id)}));S.fn.push(label+' (partner '+info.ym+')')}
+      else if(info.t==='billing'){var nw3=exB(rows,info.h);var seen2=new Set(S.billing.map(function(b){return b.ym}));S.billing=S.billing.concat(nw3.filter(function(b){return!seen2.has(b.ym)}));S.fn.push(label+' (billing)')}
+    }catch(e){}
+  }
+  var fN=new Set(S.orders.map(function(o){return o.ym})).size;
+  var pN=Object.keys(S.pm).length;
+  GDrive.showResult('読み込み完了','成果確定 '+fN+'ヶ月 / パートナーRP '+pN+'ヶ月');
+  analyze();render();
+};
+
+// ═══ Reset ═══
+function reset(){
+  var mode=S.mode;
+  S={orders:[],pm:{},billing:[],fn:[],enc:S.enc||'Shift_JIS',tab:'overview',sp:'all',sm:'all',dp:'all',spt:'all',sptM:'latest',A:null,mode:null};
+  $('modeSelect').classList.remove('compact');
+  $('modeGuide').classList.remove('hd');
+  $('modeCSV').classList.remove('active');$('modeGD').classList.remove('active');
+  $('csvPanel').classList.add('hd');$('gdrivePanel').classList.add('hd');
+  $('dataCheck').classList.add('hd');
+  if(mode==='gdrive')GDrive.reset();
+  render();
+}
+
+// ═══ Events ═══
+$('ci').addEventListener('change',function(e){hF(e.target.files)});
+var uc=$('uCard');['dragover','dragenter'].forEach(function(ev){uc.addEventListener(ev,function(e){e.preventDefault();$('dz').classList.add('ov')})});
+['dragleave','dragend'].forEach(function(ev){uc.addEventListener(ev,function(){$('dz').classList.remove('ov')})});
+uc.addEventListener('drop',function(e){e.preventDefault();$('dz').classList.remove('ov');hF(e.dataTransfer.files)});
 var rT;window.addEventListener('resize',function(){clearTimeout(rT);rT=setTimeout(function(){if(S.A)render()},200)});
-window.addEventListener('load',function(){setTimeout(function(){try{initGIS()}catch(e){}},500)});
 render();
 </script>
 </body>
