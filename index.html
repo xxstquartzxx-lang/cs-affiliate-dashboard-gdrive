@@ -180,10 +180,23 @@ function updateSteps(n){
 async function loadCSVsFromFolder(folder){
   showView('loadingView');updateSteps(3);
   $('loadMsg').textContent=GD.selectedStore.name+' / '+folder.name+' を読み込み中...';
-  $('loadProg').style.width='10%';$('loadDetail').textContent='CSVファイルを検索中...';
+  $('loadProg').style.width='5%';$('loadDetail').textContent='CSVファイルを検索中...';
   try{
+    // 直下のCSVを検索
     var res=await driveList("'"+folder.id+"' in parents and (mimeType='text/csv' or name contains '.csv') and trashed=false");
-    var files=res.files||[];
+    var files=(res.files||[]).map(function(f){f.sub='';return f});
+
+    // サブフォルダも検索
+    $('loadDetail').textContent='サブフォルダを検索中...';
+    var subRes=await driveList("'"+folder.id+"' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false");
+    var subs=subRes.files||[];
+    for(var si=0;si<subs.length;si++){
+      $('loadProg').style.width=Math.round(5+si/Math.max(subs.length,1)*10)+'%';
+      $('loadDetail').textContent='サブフォルダ検索中... '+subs[si].name;
+      var subCsv=await driveList("'"+subs[si].id+"' in parents and (mimeType='text/csv' or name contains '.csv') and trashed=false");
+      (subCsv.files||[]).forEach(function(f){f.sub=subs[si].name;files.push(f)});
+    }
+
     if(!files.length){$('loadDetail').textContent='CSVファイルが見つかりません';setTimeout(function(){showView('folderView');showSubFolders(GD.selectedStore)},2000);return}
 
     S.orders=[];S.pm={};S.billing=[];S.fn=[];
@@ -191,20 +204,20 @@ async function loadCSVsFromFolder(folder){
 
     for(var i=0;i<files.length;i++){
       var f=files[i];
-      var pct=10+Math.round(i/files.length*80);
-      $('loadProg').style.width=pct+'%';$('loadDetail').textContent='読み込み中 ('+(i+1)+'/'+files.length+') '+f.name;
+      var pct=20+Math.round(i/files.length*70);
+      $('loadProg').style.width=pct+'%';$('loadDetail').textContent='読み込み中 ('+(i+1)+'/'+files.length+') '+(f.sub?f.sub+'/':'')+f.name;
       try{
         var text=await driveText(f.id);
         var rows=pCSV(text);
         var info=idT(rows);
         if(info.t==='fixed'||info.t==='orders'){
-          var nw=exO(rows,info.h);if(nw.length){var ym=nw[0].ym;S.orders=dedup(S.orders.concat(nw));report.fixed[ym]={fn:f.name,cnt:nw.length};S.fn.push(f.name+' ('+info.t+' '+ym+')')}
+          var nw=exO(rows,info.h);if(nw.length){var ym=nw[0].ym;S.orders=dedup(S.orders.concat(nw));report.fixed[ym]={fn:(f.sub?f.sub+'/':'')+f.name,cnt:nw.length};S.fn.push((f.sub?f.sub+'/':'')+f.name+' ('+info.t+' '+ym+')')}
         }else if(info.t==='partner'){
-          var nw2=exP(rows,info.h);if(!S.pm[info.ym])S.pm[info.ym]=[];var seen=new Set(S.pm[info.ym].map(function(p){return p.id}));S.pm[info.ym]=S.pm[info.ym].concat(nw2.filter(function(p){return!seen.has(p.id)}));report.partner[info.ym]={fn:f.name,cnt:nw2.length};S.fn.push(f.name+' (partner '+info.ym+')')
+          var nw2=exP(rows,info.h);if(!S.pm[info.ym])S.pm[info.ym]=[];var seen=new Set(S.pm[info.ym].map(function(p){return p.id}));S.pm[info.ym]=S.pm[info.ym].concat(nw2.filter(function(p){return!seen.has(p.id)}));report.partner[info.ym]={fn:(f.sub?f.sub+'/':'')+f.name,cnt:nw2.length};S.fn.push((f.sub?f.sub+'/':'')+f.name+' (partner '+info.ym+')')
         }else if(info.t==='billing'){
-          var nw3=exB(rows,info.h);var seen2=new Set(S.billing.map(function(b){return b.ym}));S.billing=S.billing.concat(nw3.filter(function(b){return!seen2.has(b.ym)}));report.billing[f.name]={months:nw3.map(function(b){return b.ym})};S.fn.push(f.name+' (billing)')
-        }else{report.errors.push(f.name+' → 種類を判別できません')}
-      }catch(e){report.errors.push(f.name+' → '+e.message)}
+          var nw3=exB(rows,info.h);var seen2=new Set(S.billing.map(function(b){return b.ym}));S.billing=S.billing.concat(nw3.filter(function(b){return!seen2.has(b.ym)}));report.billing[(f.sub?f.sub+'/':'')+f.name]={months:nw3.map(function(b){return b.ym})};S.fn.push((f.sub?f.sub+'/':'')+f.name+' (billing)')
+        }else{report.errors.push((f.sub?f.sub+'/':'')+f.name+' → 種類を判別できません')}
+      }catch(e){report.errors.push((f.sub?f.sub+'/':'')+f.name+' → '+e.message)}
     }
 
     $('loadProg').style.width='95%';$('loadDetail').textContent='整合性チェック中...';
